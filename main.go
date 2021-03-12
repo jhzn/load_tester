@@ -38,9 +38,7 @@ func main() {
 	}
 
 	//Channel which all results are put on
-	//Multiply by 2 because we make 2 request in our simulation
-	//An improvement would be to not hardcode and make the channel capacity dynamic because this could cause channel deadlock bugs if not handled properly
-	requestResultsChannel := make(chan RequestStats, concurrentUsers*2)
+	requestResultsChannel := make(chan RequestStats)
 
 	loadTestStartTime := time.Now()
 	//Limit the amount of concurrent requests being made because of file handles limit caused by too many open sockets
@@ -83,7 +81,10 @@ func main() {
 	}
 
 	fileName := "request_stats.csv"
-	f, _ := os.Create(fileName)
+	f, err := os.Create(fileName)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer f.Close()
 	//Write csv headers
 	_, err = f.Write([]byte("RequestNumber;RequestType;RequestTime(ms)\n"))
